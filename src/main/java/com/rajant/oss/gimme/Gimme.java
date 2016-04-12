@@ -18,9 +18,8 @@ public class Gimme {
      * @return the registered singleton
      */
     public static <T> T set(T singleton, Class<? super T>... ifaces) {        
-        setSupplier(
-            new ConstantSupplier(requireNonNull(singleton, "implementation")),
-            ifaces);
+        requireNonNull(singleton, "implementation");
+        setSupplier(() -> singleton, ifaces);
         return singleton;
     }
 
@@ -90,12 +89,6 @@ public class Gimme {
         return ifaces;
     }
     
-    private static class ConstantSupplier<T> implements Supplier<T> {
-        private final T _t;
-        private ConstantSupplier(T t) { _t = t; }
-        @Override public T get() { return _t; }
-    }
-        
     public static class NotFoundException extends Exception {
         private NotFoundException(String msg) { super(msg); }
     }
