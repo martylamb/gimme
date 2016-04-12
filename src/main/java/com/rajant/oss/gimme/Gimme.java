@@ -8,7 +8,8 @@ import java.util.function.Supplier;
  * A simple service locator for dependency inversion
  */
 public class Gimme {
-    
+
+    /** suppliers of every implementation we can provide, keyed by interface */
     private static final Map<Class<?>, Supplier> _suppliers = new java.util.HashMap<>();
     
     /**
@@ -43,44 +44,47 @@ public class Gimme {
     }
     
     /**
-     * Returns an implementation of the specified interface, or null if no implementation is available
+     * Returns an implementation of the specified interface, or throws a NotFoundException if no implementation is available
      * @param iface the interface for which an implementation is desired
      * @return an implementation of the specified interface, or null if no implementation is available
+     * @throws NotFoundException if no implementation is available
      */
-    public static <T> T a(Class<? super T> iface) {
+    public static <T> T a(Class<? super T> iface) throws NotFoundException {
         synchronized(_suppliers) {
             Supplier<T> supplier = _suppliers.get(iface);
-            return (supplier == null) ? null : supplier.get();
+            if (supplier == null) throw new NotFoundException(iface);
+            return supplier.get();
         }
     }
     
     /**
+     * Returns an implementation of the specified interface, or throws a NotFoundException if no implementation is available
      * Exactly equivalent to `a(Class<? super T> iface)`
      * @see Gimme#a(java.lang.Class) 
+     * @param iface the interface for which an implementation is desired
+     * @return an implementation of the specified interface, or null if no implementation is available
+     * @throws NotFoundException if no implementation is available
      */
-    public static <T> T an(Class<? super T> iface) { return a(iface); }
+    public static <T> T an(Class<? super T> iface) throws NotFoundException { return a(iface); }
     
     /**
      * Convenience method to return an Optional<T> wrapping around a call to {@link Gimme#a(java.lang.Class)}
+     * No exception is thrown if an implementation is not available.
+     * 
+     * @param iface the interface for which an implementation is desired
+     * @return an Optional wrapping an implementation of the specified interface, or Optional.empty if no implementation is available
      */
     public static <T> Optional<T> optional(Class<? super T> iface) {
-        return Optional.ofNullable(a(iface));
+        try {
+            return Optional.of(an(iface));
+        } catch (NotFoundException ohWell) {
+            return Optional.empty();
+        }        
     }
     
-    /**
-     * Returns an implementation of the specified interface, or throws a NotFoundException if no implementation is available
-     * @param iface the interface for which an implementation is desired
-     * @return an implementation of the specified interface
-     * @throws NotFoundException if no implementation is available
-     */
-    public static <T> T orThrow(Class<? super T> iface) throws NotFoundException {
-        T result = a(iface);
-        if (result == null) throw new NotFoundException("implementation not available: " + iface);
-        return result;
-    }
-            
+    // type will be either "implementation" or "supplier.
     private static <T> T requireNonNull(T t, String type) {
-        if (t == null) throw new NullPointerException("failed to register null service " + type);
+        if (t == null) throw new NullPointerException(type + " may not be null");
         return t;
     }
     
@@ -90,6 +94,6 @@ public class Gimme {
     }
     
     public static class NotFoundException extends Exception {
-        private NotFoundException(String msg) { super(msg); }
+        private NotFoundException(Class iface) { super("implementation not found: " + iface); }
     }
 }

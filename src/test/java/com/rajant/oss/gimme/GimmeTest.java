@@ -56,21 +56,26 @@ public class GimmeTest {
     
     @Test public void testThrow() {
         try {
-            Gimme.orThrow(Runnable.class);
+            Gimme.a(Runnable.class);
             fail("did not throw");
         } catch (Gimme.NotFoundException expected) {}        
     }
     
+    @Test public void testOptional() {
+        String s = "Test String";        
+        Gimme.set(s, CharSequence.class);
+
+        assertEquals(s, Gimme.optional(CharSequence.class).get());
+        assertFalse(Gimme.optional(Comparable.class).isPresent());
+    }
+    
     @Test public void testMultipleGets() throws Gimme.NotFoundException {
-        String s = "Test String";
-        
+        String s = "Test String";        
         Gimme.set(s, CharSequence.class);
         
         assertEquals(s, Gimme.a(CharSequence.class));
         assertEquals(s, Gimme.an(CharSequence.class));
         assertEquals(s, Gimme.optional(CharSequence.class).get());
-        assertEquals(s, Gimme.orThrow(CharSequence.class));
-
-        assertNull(Gimme.a(Runnable.class));
+        assertEquals(s, Gimme.a(CharSequence.class));
     }
 }
