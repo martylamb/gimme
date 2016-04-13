@@ -50,11 +50,12 @@ public class Gimme {
      * @throws NotFoundException if no implementation is available
      */
     public static <T> T a(Class<? super T> iface) throws NotFoundException {
+        Supplier<T> supplier;
         synchronized(_suppliers) {
-            Supplier<T> supplier = _suppliers.get(iface);
-            if (supplier == null) throw new NotFoundException(iface);
-            return supplier.get();
+            supplier = _suppliers.get(iface);
         }
+        if (supplier == null) throw new NotFoundException(iface);
+        return supplier.get();
     }
     
     /**
