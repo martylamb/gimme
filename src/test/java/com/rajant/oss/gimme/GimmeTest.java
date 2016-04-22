@@ -31,6 +31,10 @@ public class GimmeTest {
             Gimme.set("hello", Serializable.class, CharSequence.class, null);
             fail("able to register a null interface");
         } catch (NullPointerException expected) {}
+        
+        try {
+            Gimme.set("hello");
+        } catch (IllegalArgumentException expected) {}
     }
     
     @Test public void noNullVarargs() {
@@ -77,5 +81,40 @@ public class GimmeTest {
         assertEquals(s, Gimme.an(CharSequence.class));
         assertEquals(s, Gimme.optional(CharSequence.class).get());
         assertEquals(s, Gimme.a(CharSequence.class));
+    }
+    
+    @Test public void testClear() throws Gimme.NotFoundException {
+        Gimme.clear();
+        assertFalse(Gimme.has(CharSequence.class));
+        Gimme.set("HELLO", CharSequence.class);
+        assertTrue(Gimme.has(CharSequence.class));
+        assertEquals("HELLO", Gimme.a(CharSequence.class));
+    }
+    
+    @Test public void testRequires() throws Gimme.NotFoundException {
+        Gimme.clear();
+        try {
+            Gimme.require(Serializable.class, CharSequence.class);
+            fail("Expected an exception");
+        } catch (Gimme.NotFoundException expected) {}
+        
+        try {
+            Gimme.require(null);
+            fail("Expected a NullPointerException");
+        } catch(NullPointerException expected) {}
+        
+        Gimme.set(123, Serializable.class);
+        try {
+            Gimme.require(Serializable.class, CharSequence.class);
+            fail("Expected an exception");
+        } catch (Gimme.NotFoundException expected) {}
+
+        Gimme.set("hello", CharSequence.class);
+        Gimme.require(Serializable.class, CharSequence.class);
+        
+        try {
+            Gimme.require(null, CharSequence.class);
+            fail("Expected a NullPointerException");
+        } catch (NullPointerException expected) {}
     }
 }

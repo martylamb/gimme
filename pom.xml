@@ -1,10 +1,44 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+
+    <prerequisites>
+        <maven>3.0.4</maven>
+    </prerequisites>
+ 
+
     <groupId>com.rajant.oss</groupId>
     <artifactId>gimme</artifactId>
     <version>0.1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
+    
+    <name>com.rajant.oss:gimme</name>
+    <description>A simple and lightweight service locator</description>
+    <url>https://github.com/rajant-corp/gimme</url>
+    
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <email>mlamb@rajant.com</email>
+            <name>Marty Lamb</name>
+            <organization>Rajant Corp.</organization>
+            <organizationUrl>http://rajant.com</organizationUrl>
+        </developer>
+    </developers>
+
+    <scm>
+        <url>git@github.com:rajant-corp/gimme.git</url>
+        <connection>scm:git:git://github.com/rajant-corp/gimme.git</connection>
+        <developerConnection>scm:git:git@github.com:rajant-corp/gimme.git</developerConnection>
+    </scm>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -13,10 +47,11 @@
     
     <build>
         <plugins>
-             <plugin>
+            
+            <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.7.5.201505241946</version>
+                <version>0.7.6.201602180812</version>
                 <configuration>
                     <destfile>${basedir}/target/jacoco/jacoco-unit.exec</destfile>
                     <datafile>${basedir}/target/jacoco/jacoco-unit.exec</datafile>
@@ -36,10 +71,69 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>            
+            
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>1.6</version>
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+ 
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <additionalparam>-Xdoclint:none</additionalparam>
+                </configuration>
             </plugin>
 
+            <!-- http://central.sonatype.org/pages/apache-maven.html -->
+            <!-- https://github.com/sonatype/nexus-maven-plugins/tree/master/staging/maven-plugin -->
+            <plugin>
+                <groupId>org.sonatype.plugins</groupId>
+                <artifactId>nexus-staging-maven-plugin</artifactId>
+                <version>1.6.7</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <serverId>ossrh</serverId>
+                    <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                    <autoReleaseAfterClose>false</autoReleaseAfterClose>
+                </configuration>
+            </plugin>
+            
         </plugins>
     </build>
+    
     <dependencies>
         <dependency>
             <groupId>junit</groupId>
@@ -47,11 +141,14 @@
             <version>4.12</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.hamcrest</groupId>
-            <artifactId>hamcrest-core</artifactId>
-            <version>1.3</version>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
+
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
+
 </project>

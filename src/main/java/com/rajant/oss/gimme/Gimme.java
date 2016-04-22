@@ -13,6 +13,15 @@ public class Gimme {
     private static final Map<Class<?>, Supplier> _suppliers = new java.util.HashMap<>();
     
     /**
+     * Unregisters all registered singletons and suppliers
+     */
+    public static void clear() {
+        synchronized(_suppliers) {
+            _suppliers.clear();
+        }
+    }
+    
+    /**
      * Registers a singleton object as the service implementation for one or more interfaces
      * @param singleton the singleton being registered
      * @param ifaces the interfaces for which the singleton will be provided
@@ -83,7 +92,40 @@ public class Gimme {
         }        
     }
     
-    // type will be either "implementation" or "supplier.
+    /**
+     * Given one or more interfaces classes, throws a NotFoundException if any
+     * lack a registered implementation
+     * 
+     * @param ifaces the interfaces required by the client
+     * @throws com.rajant.oss.gimme.Gimme.NotFoundException 
+     */
+    public static void require(Class<?>... ifaces) throws NotFoundException {
+        synchronized(_suppliers) {
+            for (Class<?> clazz : ifaces) {
+                if (clazz == null) throw new NullPointerException("null interface specified as required");
+                if (!_suppliers.containsKey(clazz)) throw new NotFoundException(clazz);
+            }
+        }
+    }
+    
+    /**
+     * Returns a boolean indicating whether any of the specified interface classes
+     * lack a registered implementation
+     * 
+     * @param ifaces the interfaces required by the client
+     * @return a boolean indicating whether any of the specified interface classes
+     * lack a registered implementation
+     */
+    public static boolean has(Class<?>... ifaces) {
+        try {
+            require(ifaces);
+            return true;
+        } catch (NotFoundException e) {
+            return false;
+        }
+    }
+    
+    // type will be either "implementation" or "supplier", just used for message clarity
     private static <T> T requireNonNull(T t, String type) {
         if (t == null) throw new NullPointerException(type + " may not be null");
         return t;
